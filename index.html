@@ -1,119 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game of Life Background Test (Debug)</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bethany — Projects</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;        
-      overflow: hidden;
-    }
-
-    #lifeCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      display: block;
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 40px;
-      color: #00ffea;
-      text-shadow: 0 0 10px #00fff2;
-    }
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#6ee7b7;color-scheme:dark}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(180deg,#071025, #0f1724);color:#e6eef8}
+    .wrap{max-width:980px;margin:40px auto;padding:24px}
+    header{display:flex;gap:16px;align-items:center}
+    img.profile{width:84px;height:84px;border-radius:12px;object-fit:cover}
+    h1{margin:0;font-size:28px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .tags{margin-top:8px;font-size:13px;color:#9fb4d6}
+    a.button{display:inline-block;margin-top:12px;padding:8px 12px;border-radius:8px;background:var(--accent);color:#04201a;text-decoration:none;font-weight:600}
+    footer{margin-top:28px;color:#93a7c4;font-size:14px}
   </style>
 </head>
 <body>
-  <div style="position: absolute; top: 10px; left: 10px; z-index: 10; color: white;">
-  <label>Tick Speed: <span id="speedValue">100</span> ms</label><br>
-  <input type="range" min="10" max="500" value="100" id="speedSlider">
-</div>
+  <div class="wrap">
+    <header>
+      <img class="profile" src="https://via.placeholder.com/180" alt="Profile">
+      <div>
+        <h1>Bethany — Student & Developer</h1>
+        <p style="margin:6px 0 0;color:#9fb4d6">C++ | OpenGL | Web dev — projects, code, demos.</p>
+        <a class="button" href="resume.pdf" target="_blank">Download resume (PDF)</a>
+      </div>
+    </header>
 
-  <canvas id="lifeCanvas"></canvas>
-  <h1>Conway's Game of Life Background (Debug)</h1>
+    <section style="margin-top:28px">
+      <h2 style="margin:0 0 8px">Selected projects</h2>
+      <div class="grid">
+        <!-- Repeat project cards -->
+        <article class="card">
+          <h3 style="margin:0 0 6px">Particle Simulator</h3>
+          <p style="margin:0;color:#cfe6ff">A C++ OpenGL particle simulator modeling pairwise forces; uses GLFW/GLAD and custom shaders.</p>
+          <div class="tags">C++, OpenGL, GLFW, Shaders</div>
+          <a class="button" href="https://github.com/yourname/particle-sim" target="_blank">View code</a>
+        </article>
 
-  <script>
-const canvas = document.getElementById("lifeCanvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+        <article class="card">
+          <h3 style="margin:0 0 6px">8-bit Logic Minimizer</h3>
+          <p style="margin:0;color:#cfe6ff">C++ tool that minimizes Boolean expressions using bitmasking and heuristic reductions.</p>
+          <div class="tags">C++, Algorithms, Logic</div>
+          <a class="button" href="https://github.com/yourname/logic-minimizer" target="_blank">View code</a>
+        </article>
 
-let tickSpeed = 100; // default (ms)
-let cellSize = 10;
-let rows = Math.floor(canvas.height / cellSize);
-let cols = Math.floor(canvas.width / cellSize);
+      </div>
+    </section>
 
-// Initialize grid
-let grid = Array.from({ length: rows }, () =>
-  Array.from({ length: cols }, () => Math.random() > 0.8 ? 1 : 0)
-);
-
-function drawGrid() {
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "rgba(0,255,0,0.8)";
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (grid[r][c] === 1) {
-        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-      }
-    }
-  }
-}
-
-function getNextState() {
-  const next = Array.from({ length: rows }, () => Array(cols).fill(0));
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      let neighbors = 0;
-
-      // Count neighbors
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          if (dr === 0 && dc === 0) continue;
-          let nr = r + dr;
-          let nc = c + dc;
-
-          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-            neighbors += grid[nr][nc];
-          }
-        }
-      }
-
-      if (grid[r][c] === 1) {
-        next[r][c] = neighbors === 2 || neighbors === 3 ? 1 : 0;
-      } else {
-        next[r][c] = neighbors === 3 ? 1 : 0;
-      }
-    }
-  }
-
-  grid = next;
-}
-
-function tick() {
-  drawGrid();
-  getNextState();
-  setTimeout(() => requestAnimationFrame(tick), tickSpeed);
-}
-
-tick();
-
-// === Tick Speed Slider Handling ===
-const slider = document.getElementById("speedSlider");
-const valueDisplay = document.getElementById("speedValue");
-
-slider.addEventListener("input", () => {
-  tickSpeed = slider.value;
-  valueDisplay.textContent = tickSpeed;
-});
-</script>
+    <footer>
+      <div>Contact: <a href="mailto:you@example.com" style="color:#bfeadf">you@example.com</a> • <a href="https://github.com/yourname" style="color:#bfeadf">GitHub</a></div>
+    </footer>
+  </div>
 </body>
 </html>
 
