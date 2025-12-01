@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game of Life Background Test</title>
+  <title>Game of Life Background Test (Debug)</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
-      font-family: Arial, sans-serif;
       background: black;
       color: white;
+      font-family: Arial, sans-serif;
     }
 
     #lifeCanvas {
@@ -25,10 +25,8 @@
     }
 
     h1 {
-      position: relative;
       text-align: center;
       margin-top: 40px;
-      font-size: 3rem;
       color: #00ffea;
       text-shadow: 0 0 10px #00fff2;
     }
@@ -36,46 +34,74 @@
 </head>
 <body>
   <canvas id="lifeCanvas"></canvas>
-  <h1>Conway's Game of Life Background</h1>
+  <h1>Conway's Game of Life Background (Debug)</h1>
 
   <script>
-    const canvas = document.getElementById('lifeCanvas');
-    const ctx = canvas.getContext('2d');
+    console.log("SCRIPT STARTED");
 
-    // Fullscreen canvas
+    const canvas = document.getElementById('lifeCanvas');
+    if (!canvas) {
+      console.error("Canvas NOT FOUND!");
+    } else {
+      console.log("Canvas found:", canvas);
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error("Canvas context NOT FOUND!");
+    } else {
+      console.log("2D context obtained.");
+    }
+
+    // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const cellSize = 10; // <-- Large enough to see clearly
+    console.log("Canvas size set to:", canvas.width, canvas.height);
+
+    const cellSize = 10;
     const cols = Math.floor(canvas.width / cellSize);
     const rows = Math.floor(canvas.height / cellSize);
 
-    // Create grid
+    console.log("Grid size:", rows, "rows ×", cols, "cols");
+
     let grid = createGrid();
 
     function createGrid() {
+      console.log("Creating initial grid...");
       let arr = new Array(rows);
       for (let r = 0; r < rows; r++) {
         arr[r] = new Array(cols).fill(0).map(() => Math.random() > 0.75 ? 1 : 0);
       }
+      console.log("Initial grid created.");
       return arr;
     }
 
     function drawGrid() {
-      console.log("drawing");
+      if (!ctx) {
+        console.error("drawGrid: ctx is null!");
+        return;
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let liveCount = 0;
+
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           if (grid[r][c] === 1) {
+            liveCount++;
             ctx.fillStyle = "rgba(0, 255, 200, 0.8)";
             ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
           }
         }
       }
+
+      console.log("drawGrid: rendered live cells =", liveCount);
     }
 
     function updateGrid() {
       let newGrid = createEmptyGrid();
+      let changed = 0;
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -83,14 +109,18 @@
           const neighbors = countNeighbors(grid, r, c);
 
           if (alive && (neighbors < 2 || neighbors > 3)) {
-            newGrid[r][c] = 0; // dies
+            newGrid[r][c] = 0;
+            changed++;
           } else if (!alive && neighbors === 3) {
-            newGrid[r][c] = 1; // born
+            newGrid[r][c] = 1;
+            changed++;
           } else {
-            newGrid[r][c] = grid[r][c]; // stays the same
+            newGrid[r][c] = grid[r][c];
           }
         }
       }
+
+      console.log("updateGrid: cells changed this tick =", changed);
 
       grid = newGrid;
     }
@@ -115,11 +145,16 @@
     }
 
     function tick() {
-      drawGrid();
-      updateGrid();
+      try {
+        drawGrid();
+        updateGrid();
+      } catch (err) {
+        console.error("Error during tick:", err);
+      }
       requestAnimationFrame(tick);
     }
 
+    console.log("Starting animation loop...");
     tick();
   </script>
 </body>
